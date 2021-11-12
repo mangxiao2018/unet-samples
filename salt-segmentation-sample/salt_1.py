@@ -195,13 +195,63 @@ def plot_loss(results):
     plt.ylabel("log_loss")
     plt.legend();
 
+
+def plot_sample(X, y, preds, binary_preds, ix=None):
+    if ix is None:
+        ix = random.randint(0, len(X))
+
+    has_mask = y[ix].max() > 0
+
+    fig, ax = plt.subplots(1, 4, figsize=(20, 10))
+    ax[0].imshow(X[ix, ..., 0], cmap='seismic')
+    if has_mask:
+        ax[0].contour(y[ix].squeeze(), colors='k', levels=[0.5])
+    ax[0].set_title('Seismic')
+
+    ax[1].imshow(y[ix].squeeze())
+    ax[1].set_title('Salt')
+
+    ax[2].imshow(preds[ix].squeeze(), vmin=0, vmax=1)
+    if has_mask:
+        ax[2].contour(y[ix].squeeze(), colors='k', levels=[0.5])
+    ax[2].set_title('Salt Predicted')
+
+    ax[3].imshow(binary_preds[ix].squeeze(), vmin=0, vmax=1)
+    if has_mask:
+        ax[3].contour(y[ix].squeeze(), colors='k', levels=[0.5])
+    ax[3].set_title('Salt Predicted binary');
+
 # 执行
 show_data()
 
 convert_data()
 
-modelx = compilex()
+model = compilex()
 
-results = model_fit(modelx,X_train,y_train,X_valid,y_valid)
+results = model_fit(model,X_train,y_train,X_valid,y_valid)
 
 plot_loss(results)
+
+## 加载训练好的网络模型
+# Load best model
+model.load_weights('model-tgs-salt.h5')
+
+## 验证集性能评估
+# Evaluate on validation set (this must be equals to the best log_loss)
+model.evaluate(X_valid, y_valid, verbose=1)
+
+## 网络预测
+# Predict on train, and val
+preds_train = model.predict(X_train, verbose=1)
+preds_val = model.predict(X_valid, verbose=1)
+
+# Threshold predictions
+preds_train_t = (preds_train > 0.5).astype(np.uint8)
+preds_val_t = (preds_val > 0.5).astype(np.uint8)
+
+## 预测值与验证值对比
+# Check if training data looks all right
+plot_sample(X_train, y_train, preds_train, preds_train_t, ix=14)
+
+# Check if valid data looks all right
+plot_sample(X_valid, y_valid, preds_val, preds_val_t, ix=13)
