@@ -20,7 +20,7 @@ from keras.layers.pooling import MaxPooling2D, GlobalMaxPool2D
 from keras.layers.merge import concatenate, add
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
@@ -181,7 +181,7 @@ callbacks = [
 
 
 def model_fit(model,X_train,y_train,X_valid,y_valid):
-    results = model.fit(X_train, y_train, batch_size=32, epochs=100, callbacks=callbacks,
+    results = model.fit(X_train, y_train, batch_size=32, epochs=2, callbacks=callbacks,
                     validation_data=(X_valid, y_valid))
     return results
 
@@ -194,6 +194,7 @@ def plot_loss(results):
     plt.xlabel("Epochs")
     plt.ylabel("log_loss")
     plt.legend();
+    plt.show()
 
 
 def plot_sample(X, y, preds, binary_preds, ix=None):
@@ -220,6 +221,7 @@ def plot_sample(X, y, preds, binary_preds, ix=None):
     if has_mask:
         ax[3].contour(y[ix].squeeze(), colors='k', levels=[0.5])
     ax[3].set_title('Salt Predicted binary');
+    plt.show()
 
 # 执行
 show_data()
@@ -234,7 +236,7 @@ plot_loss(results)
 
 ## 加载训练好的网络模型
 # Load best model
-model.load_weights('model-tgs-salt.h5')
+model.load_weights('model-tgs-saltx.h5')
 
 ## 验证集性能评估
 # Evaluate on validation set (this must be equals to the best log_loss)
